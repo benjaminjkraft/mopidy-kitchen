@@ -17,11 +17,11 @@ var PlayPauseButton = React.createClass({
         () => this.props.mopidy.playback.play()}>▶</div>;
     };
 
-    var stopbutton = <div onClick={
-        () => this.props.mopidy.playback.play()}>◼</div>;
-
     return <div className="play-pause-button">
-      {playbutton}{stopbutton}
+      <div onClick={() => this.props.mopidy.playback.previous()}>◀▐</div>
+      {playbutton}
+      <div onClick={() => this.props.mopidy.playback.stop()}>◼</div>
+      <div onClick={() => this.props.mopidy.playback.next()}>▐▶</div>
     </div>;
   },
 });
