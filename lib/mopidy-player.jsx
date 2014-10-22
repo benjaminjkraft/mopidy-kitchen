@@ -3,13 +3,13 @@ var Mopidy = require("mopidy");
 var React = require("react");
 var _ = require("underscore");
 
-var NowPlayingBox = require("./now-playing-box.jsx");
+var Tracklist = require("./tracklist.jsx");
 var PlayPauseButton = require("./play-pause-button.jsx");
 
 var MopidyPlayer = React.createClass({
   getInitialState: function () {
     var mopidy = new Mopidy({
-      webSocketUrl: "ws://redox.mit.edu:6680/mopidy/ws/",
+      webSocketUrl: "ws://redox.mit.edu/mopidy/ws/",
       autoConnect: false,
     });
     mopidy.on(console.log.bind(console));
@@ -20,6 +20,8 @@ var MopidyPlayer = React.createClass({
         track => this.setState({nowPlaying: track}));
       mopidy.playback.getState().done(
         state => this.setState({state: state}));
+      mopidy.tracklist.getTlTracks().done(
+        tlTracks => this.setState({tracklist: tlTracks}));
     });
     mopidy.on('state:offline', () => this.setState({connected: false}));
 
@@ -29,11 +31,13 @@ var MopidyPlayer = React.createClass({
               event => this.setState({nowPlaying: null}));
     mopidy.on('event:trackPlaybackStarted',
               event => this.setState({nowPlaying: event.tl_track.track}));
+    mopidy.on('event:tracklistChanged',
+              () => mopidy.tracklist.getTlTracks().done(
+                tlTracks => this.setState({tracklist: tlTracks})));
               // TODO:
               // event:trackPlaybackPaused (for time_position?)
               // event:trackPlaybackResumed (for time_position?)
               // event:volumeChanged
-              // event:tracklistChanged
               // event:optionsChanged
               // event:playlistsLoaded (?)
 
@@ -43,6 +47,7 @@ var MopidyPlayer = React.createClass({
       connected: false,
       state: null,
       currentTrack: null,
+      tracklist: null,
       mopidy: mopidy,
     };
   },
@@ -53,7 +58,7 @@ var MopidyPlayer = React.createClass({
     } else {
       return <div>
         <PlayPauseButton state={this.state.state} mopidy={this.state.mopidy} />
-        <NowPlayingBox nowPlaying={this.state.nowPlaying} />
+        <Tracklist tracklist={this.state.tracklist} />
       </div>;
     }
   },
